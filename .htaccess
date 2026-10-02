@@ -1,0 +1,32 @@
+# Включение механизма перезаписи
+RewriteEngine On
+
+# Установка кодировки по умолчанию
+AddDefaultCharset utf-8
+
+# Запрет доступа к файлам конфигурации и логам
+<FilesMatch "^(config\.php|\.htaccess|\.git|\.env)">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Запрет прямого доступа к внутренним директориям
+RewriteRule ^includes/ - [F,L]
+RewriteRule ^Database/ - [F,L]
+RewriteRule ^integration/common/ - [F,L]
+RewriteRule ^runtime/ - [F,L]
+
+# Запрет просмотра содержимого папок
+Options -Indexes
+
+# Перенаправление всех запросов, которые не являются существующими файлами/папками, на api.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ api.php [QSA,L]
+
+# Установка заголовков безопасности (опционально)
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
